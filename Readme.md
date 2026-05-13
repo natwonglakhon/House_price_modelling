@@ -24,7 +24,8 @@ california-housing/
     ├── data_vs_price.png
     ├── data_distribution.png
     ├── Test_vs_model.png
-    └── Test_vs_model_rf.png
+    ├── Test_vs_model_rf.png
+    └── feature_importance.png
 ```
 
 ---
@@ -66,9 +67,11 @@ california-housing/
 |--------|------------------|----------------------|
 | R2 Score | 0.615 | 0.791 |
 
-Linear regression gives at 61.5% R2, which is a reasonable baseline. Switching to Random Forest with 400 trees produces this up to 79.1%, a meaningful improvement that comes from the model being able to capture non-linear relationships in the data that linear regression simply cannot handle.
+Linear regression gives at 61.5% R2, which is a reasonable baseline. Switching to Random Forest with 400 trees improves this up to 79.1%. The improvement comes from the model being able to capture non-linear relationships in the data that linear regression cannot handle.
 
 The Random Forest was also tested across different numbers of trees (100, 200, 300, 400) and R2 improves gradually as more trees are added.
+
+Looking at feature importance, median income is by far the strongest predictor, accounting for 43.6% of the model's decisions. Location features (latitude and longitude) are the next most influential, which makes intuitive sense for housing prices.
 
 ### Visualisations
 
@@ -87,6 +90,10 @@ The Random Forest was also tested across different numbers of trees (100, 200, 3
 **Test data vs Random Forest Prediction**
 
 ![Test vs RF Prediction](images/Test_vs_model_rf.png)
+
+**Feature Importance (Random Forest)**
+
+![Feature Importance](images/feature_importance.png)
 
 ---
 
@@ -129,18 +136,13 @@ jupyter
 - Data quality has a real impact. Removing the capped $500k values gave a noticeable improvement in R2.
 - Linear regression has limits. When the underlying relationships are non-linear, the model will hit a ceiling no matter how well you tune it.
 - Random Forest handles non-linearity well but comes at a cost of higher training time and less interpretability.
+- Feature importance gives meaning to the model's score. Knowing that median income drives 43.6% of predictions is far more useful than a number alone.
 
 ---
 
 ## Future Improvements
 
 - Try XGBoost to see if it can push R2 beyond the Random Forest result
+- Tune Random Forest further using `GridSearchCV` over `max_depth` and `min_samples_split`
 - Explore additional feature engineering, such as rooms per household or bedrooms per room
-- Add a correlation heatmap to better understand which features actually matter
-- Run hyperparameter tuning with `GridSearchCV` on the Random Forest
-
----
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
+- Add a correlation heatmap to complement the feature importance analysis
