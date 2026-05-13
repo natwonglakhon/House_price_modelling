@@ -1,6 +1,6 @@
 # California Housing Price Prediction
 
-A machine learning project that predicts California median house prices using linear regression (SGDRegressor) with scikit-learn.
+A machine learning project that predicts California median house prices using two models, linear regression (SGDRegressor) and Random Forest, with scikit-learn.
 
 ---
 
@@ -23,7 +23,8 @@ california-housing/
     ├── median_house_value_distribution_filtered.png
     ├── data_vs_price.png
     ├── data_distribution.png
-    └── Test_vs_model.png
+    ├── Test_vs_model.png
+    └── Test_vs_model_rf.png
 ```
 
 ---
@@ -53,18 +54,21 @@ california-housing/
 - Used `StandardScaler` (Z-score normalisation: mean=0, std=1)
 - The scaler was fitted only on training data to avoid data leakage into the test set
 
-### 5. Model
+### 5. Models
 - Trained a **SGDRegressor** (Stochastic Gradient Descent linear regression) with `max_iter=2000`
+- Trained a **RandomForestRegressor** with varying `n_estimators` (100, 200, 300, 400) to find the best configuration
 
 ---
 
 ## Results
 
-| Metric | Score |
-|--------|-------|
-| R2 Score | ~0.615 |
+| Metric | Linear Regression | Random Forest (n=400) |
+|--------|------------------|----------------------|
+| R2 Score | 0.615 | 0.791 |
 
-The model lands at around 61.5% R2. This is a reasonable result for linear regression on this dataset, as the relationship between features and house price is not purely linear. Tree-based models like Random Forest typically do better here.
+Linear regression gives at 61.5% R2, which is a reasonable baseline. Switching to Random Forest with 400 trees produces this up to 79.1%, a meaningful improvement that comes from the model being able to capture non-linear relationships in the data that linear regression simply cannot handle.
+
+The Random Forest was also tested across different numbers of trees (100, 200, 300, 400) and R2 improves gradually as more trees are added.
 
 ### Visualisations
 
@@ -76,9 +80,13 @@ The model lands at around 61.5% R2. This is a reasonable result for linear regre
 
 ![Data vs Price](images/data_vs_price.png)
 
-**Test data vs Model Prediction**
+**Test data vs Linear Regression Prediction**
 
 ![Test vs Prediction](images/Test_vs_model.png)
+
+**Test data vs Random Forest Prediction**
+
+![Test vs RF Prediction](images/Test_vs_model_rf.png)
 
 ---
 
@@ -120,15 +128,16 @@ jupyter
 - Fit the scaler on training data only. Fitting on the full dataset leaks test information into the model.
 - Data quality has a real impact. Removing the capped $500k values gave a noticeable improvement in R2.
 - Linear regression has limits. When the underlying relationships are non-linear, the model will hit a ceiling no matter how well you tune it.
+- Random Forest handles non-linearity well but comes at a cost of higher training time and less interpretability.
 
 ---
 
 ## Future Improvements
 
-- Try Random Forest or XGBoost, which typically reach above 0.80 R2 on this dataset
+- Try XGBoost to see if it can push R2 beyond the Random Forest result
 - Explore additional feature engineering, such as rooms per household or bedrooms per room
 - Add a correlation heatmap to better understand which features actually matter
-- Run hyperparameter tuning with `GridSearchCV`
+- Run hyperparameter tuning with `GridSearchCV` on the Random Forest
 
 ---
 
