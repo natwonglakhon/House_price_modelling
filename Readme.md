@@ -86,7 +86,7 @@ The model lands at around 61.5% R2. This is a reasonable result for linear regre
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/california-housing.git
+git clone https://github.com/natwonglakhon/california-housing.git
 cd california-housing
 ```
 
