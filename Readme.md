@@ -57,21 +57,20 @@ california-housing/
 
 ### 5. Models
 - Trained a **SGDRegressor** (Stochastic Gradient Descent linear regression) with `max_iter=2000`
-- Trained a **RandomForestRegressor** with varying `n_estimators` (100, 200, 300, 400) to find the best configuration
+- Trained a **RandomForestRegressor** as a baseline with `n_estimators=200`
+- Tuned the Random Forest using **RandomizedSearchCV** with 5-fold cross validation, searching over `n_estimators`, `max_depth`, and `min_samples_split` across 15 random combinations
 
 ---
 
 ## Results
 
-| Metric | Linear Regression | Random Forest (n=400) |
-|--------|------------------|----------------------|
-| R2 Score | 0.615 | 0.791 |
+| Metric | Linear Regression | Random Forest (baseline) | Random Forest (tuned) |
+|--------|------------------|--------------------------|----------------------|
+| R2 Score | 0.615 | 0.790 | 0.791 |
 
-Linear regression gives at 61.5% R2, which is a reasonable baseline. Switching to Random Forest with 400 trees improves this up to 79.1%. The improvement comes from the model being able to capture non-linear relationships in the data that linear regression cannot handle.
+Linear regression lands at 61.5% R2. Switching to Random Forest pushes this up to 79.1%, with the tuned model matching the baseline. The modest gain from tuning suggests the default Random Forest configuration is already well suited to this dataset, but the process confirms that the parameters are in a reasonable range.
 
-The Random Forest was also tested across different numbers of trees (100, 200, 300, 400) and R2 improves gradually as more trees are added.
-
-Looking at feature importance, median income is by far the strongest predictor, accounting for 43.6% of the model's decisions. Location features (latitude and longitude) are the next most influential, which makes intuitive sense for housing prices.
+The improvement over linear regression comes from the model being able to capture non-linear relationships in the data. Looking at feature importance, median income is by far the strongest predictor, accounting for 43.6% of the model's decisions. Location features (latitude and longitude) are the next most influential, which makes intuitive sense for housing prices.
 
 ### Visualisations
 
@@ -137,12 +136,14 @@ jupyter
 - Linear regression has limits. When the underlying relationships are non-linear, the model will hit a ceiling no matter how well you tune it.
 - Random Forest handles non-linearity well but comes at a cost of higher training time and less interpretability.
 - Feature importance gives meaning to the model's score. Knowing that median income drives 43.6% of predictions is far more useful than a number alone.
+- RandomizedSearchCV is a practical alternative to GridSearchCV when the parameter space is large. It finds a good configuration without trying every single combination.
 
 ---
 
 ## Future Improvements
 
-- Try XGBoost to see if it can push R2 beyond the Random Forest result
-- Tune Random Forest further using `GridSearchCV` over `max_depth` and `min_samples_split`
+- Try XGBoost to see if it can push R2 beyond the current 79.1%
 - Explore additional feature engineering, such as rooms per household or bedrooms per room
 - Add a correlation heatmap to complement the feature importance analysis
+- Add a predicted vs actual scatter plot to visualise model accuracy more intuitively
+
