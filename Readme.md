@@ -91,7 +91,7 @@ Looking at feature importance, median income is by far the strongest predictor, 
 
 ![Data vs Price](images/data_vs_price.png)
 
-**Aggregated feature distributions**
+**Aggregated feature distributions (Log scaled)**
 
 ![Aggregated Feature Distributions](images/data_distribution_extra.png)
 
