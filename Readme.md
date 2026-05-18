@@ -145,7 +145,7 @@ jupyter
 
 - Always split your data before evaluating. Scoring on training data gives a misleadingly good result.
 - Fit the scaler on training data only. Fitting on the full dataset leaks test information into the model.
-- Data quality has a real impact. Removing the capped $500k values gave a noticeable improvement in R2.
+- Data quality is very important. Removing the capped $500k values gave a noticeable improvement in R2.
 - Linear regression has limits. When the underlying relationships are non-linear, the model will hit a ceiling no matter how well you tune it.
 - Feature engineering helps linear models but not always tree-based ones. Random Forest can already discover ratio-based relationships through sequential splits, so adding derived features made no difference to its R2.
 - Feature importance gives meaning to the model's score. Knowing that median income drives 43.6% of predictions is far more useful than a number alone.
