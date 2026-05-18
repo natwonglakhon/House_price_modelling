@@ -73,9 +73,9 @@ california-housing/
 
 | Metric | LR (baseline) | LR (aggregated) | RF (baseline) | RF (tuned) | RF (aggregated) |
 |--------|--------------|-----------------|---------------|------------|-----------------|
-| R2 Score | 0.615 | 0.640 | 0.791 | 0.791 | 0.791 |
+| R2 Score | 0.61 | 0.64 | 0.790 | 0.791 | 0.786 |
 
-Linear Regression improves from 61.5% to 64% when aggregated features are added, as the derived ratios help capture some non-linear relationships that a linear model cannot learn on its own. Switching to Random Forest pushes R2 significantly to 79.1%. The tuned model matches the baseline, suggesting the default configuration is already well suited to this dataset.
+Linear Regression improves from 61% to 64% when aggregated features are added, as the derived ratios help capture some non-linear relationships that a linear model cannot learn on its own. Switching to Random Forest pushes R2 significantly to 79.1%. The tuned model matches the baseline, suggesting the default configuration is already well suited to this dataset.
 
 Notably, adding the aggregated features did not improve the Random Forest model. This is expected since Random Forest can already discover these relationships implicitly through sequential splits on the underlying features, making the derived ratios redundant.
 
