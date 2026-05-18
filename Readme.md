@@ -23,6 +23,7 @@ california-housing/
     ├── median_house_value_distribution_filtered.png
     ├── data_vs_price.png
     ├── data_distribution.png
+    ├── data_distribution_extra.png
     ├── Test_vs_model.png
     ├── Test_vs_model_rf.png
     └── feature_importance.png
@@ -47,6 +48,11 @@ california-housing/
 
 ### 2. Feature Engineering
 - Applied one-hot encoding (`get_dummies`) on the categorical `ocean_proximity` column, turning 5 categories into 4 dummy variables using `drop_first=True`
+- Derived three aggregated features from existing columns to capture ratio-based relationships:
+  - `rooms_per_household` = log(total_rooms / households)
+  - `bedrooms_per_room` = log(total_bedrooms / total_rooms)
+  - `population_per_household` = log(population / households)
+- Log transformation was applied to the ratios to reduce skewness
 
 ### 3. Train/Test Split
 - Split the data 70% training and 30% testing using `train_test_split` with `random_state=42`
@@ -56,21 +62,24 @@ california-housing/
 - The scaler was fitted only on training data to avoid data leakage into the test set
 
 ### 5. Models
-- Trained a **SGDRegressor** (Stochastic Gradient Descent linear regression) with `max_iter=2000`
+- Trained a **SGDRegressor** (Stochastic Gradient Descent linear regression) with `max_iter=2000`, both with and without aggregated features
 - Trained a **RandomForestRegressor** as a baseline with `n_estimators=200`
-- Tuned the Random Forest using **RandomizedSearchCV** with 5-fold cross validation, searching over `n_estimators`, `max_depth`, and `min_samples_split` across 15 random combinations
+- Tuned the Random Forest using **RandomizedSearchCV** with 5-fold cross validation, searching over `n_estimators`, `max_depth`, and `min_samples_split` across 24 random combinations
+- Tested the Random Forest on aggregated features to compare against the baseline
 
 ---
 
 ## Results
 
-| Metric | Linear Regression | Random Forest (baseline) | Random Forest (tuned) |
-|--------|------------------|--------------------------|----------------------|
-| R2 Score | 0.615 | 0.790 | 0.791 |
+| Metric | LR (baseline) | LR (aggregated) | RF (baseline) | RF (tuned) | RF (aggregated) |
+|--------|--------------|-----------------|---------------|------------|-----------------|
+| R2 Score | 0.615 | 0.640 | 0.791 | 0.791 | 0.791 |
 
-Linear regression lands at 61.5% R2. Switching to Random Forest pushes this up to 79.1%, with the tuned model matching the baseline. The modest gain from tuning suggests the default Random Forest configuration is already well suited to this dataset, but the process confirms that the parameters are in a reasonable range.
+Linear Regression improves from 61.5% to 64% when aggregated features are added, as the derived ratios help capture some non-linear relationships that a linear model cannot learn on its own. Switching to Random Forest pushes R2 significantly to 79.1%. The tuned model matches the baseline, suggesting the default configuration is already well suited to this dataset.
 
-The improvement over linear regression comes from the model being able to capture non-linear relationships in the data. Looking at feature importance, median income is by far the strongest predictor, accounting for 43.6% of the model's decisions. Location features (latitude and longitude) are the next most influential, which makes intuitive sense for housing prices.
+Notably, adding the aggregated features did not improve the Random Forest model. This is expected since Random Forest can already discover these relationships implicitly through sequential splits on the underlying features, making the derived ratios redundant.
+
+Looking at feature importance, median income is by far the strongest predictor, accounting for 43.6% of the model's decisions. Location features (latitude and longitude) are the next most influential, which makes intuitive sense for housing prices. It is worth noting that binary features like `ocean_proximity` may be slightly underrepresented in importance scores since they have fewer possible split thresholds than continuous features.
 
 ### Visualisations
 
@@ -81,6 +90,10 @@ The improvement over linear regression comes from the model being able to captur
 **Feature vs Price**
 
 ![Data vs Price](images/data_vs_price.png)
+
+**Aggregated feature distributions**
+
+![Aggregated Feature Distributions](images/data_distribution_extra.png)
 
 **Test data vs Linear Regression Prediction**
 
@@ -132,10 +145,10 @@ jupyter
 
 - Always split your data before evaluating. Scoring on training data gives a misleadingly good result.
 - Fit the scaler on training data only. Fitting on the full dataset leaks test information into the model.
-- Data quality is important. Removing the capped $500k values gave a noticeable improvement in R2.
-- Linear regression has limits. When the nature relationships of the data are non-linear, the model will not be futhered improved, no matter how well you tune it.
-- Random Forest handles non-linearity well but comes at a cost of higher training time and less interpretability.
-- Feature importance gives meaning to the model's score. Knowing that median income contributes 43.6% of predictions is far more useful than a number alone.
+- Data quality has a real impact. Removing the capped $500k values gave a noticeable improvement in R2.
+- Linear regression has limits. When the underlying relationships are non-linear, the model will hit a ceiling no matter how well you tune it.
+- Feature engineering helps linear models but not always tree-based ones. Random Forest can already discover ratio-based relationships through sequential splits, so adding derived features made no difference to its R2.
+- Feature importance gives meaning to the model's score. Knowing that median income drives 43.6% of predictions is far more useful than a number alone.
 - RandomizedSearchCV is a practical alternative to GridSearchCV when the parameter space is large. It finds a good configuration without trying every single combination.
 
 ---
@@ -143,7 +156,7 @@ jupyter
 ## Future Improvements
 
 - Try XGBoost to see if it can push R2 beyond the current 79.1%
-- Explore additional feature engineering, such as rooms per household or bedrooms per room
-- Add a correlation heatmap to complement the feature importance analysis
+- Add a correlation heatmap to understand which raw features relate most strongly to price
 - Add a predicted vs actual scatter plot to visualise model accuracy more intuitively
+- Try permutation importance alongside split-based importance to get a less biased view of feature contributions
 
