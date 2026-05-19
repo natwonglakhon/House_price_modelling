@@ -26,7 +26,10 @@ california-housing/
     ├── data_distribution_extra.png
     ├── Test_vs_model.png
     ├── Test_vs_model_rf.png
-    └── feature_importance.png
+    ├── feature_importance.png
+    ├── residuals_vs_fitted.png
+    ├── residual_distribution.png
+    └── error_map.png
 ```
 
 ---
@@ -48,11 +51,13 @@ california-housing/
 
 ### 2. Feature Engineering
 - Applied one-hot encoding (`get_dummies`) on the categorical `ocean_proximity` column, turning 5 categories into 4 dummy variables using `drop_first=True`
-- Derived three aggregated features from existing columns to capture ratio-based relationships:
+- Derived four aggregated features from existing columns to capture ratio-based relationships:
   - `rooms_per_household` = log(total_rooms / households)
   - `bedrooms_per_room` = log(total_bedrooms / total_rooms)
   - `population_per_household` = log(population / households)
-- Log transformation was applied to the ratios to reduce skewness
+  - `income_x_density` = log(median_income x population / total_rooms)
+- Log transformation was applied to reduce skewness in the derived ratios
+- After residual analysis revealed that the worst predictions were concentrated around major cities, added Euclidean distance features to San Francisco, Los Angeles, and San Diego
 
 ### 3. Train/Test Split
 - Split the data 70% training and 30% testing using `train_test_split` with `random_state=42`
@@ -65,21 +70,24 @@ california-housing/
 - Trained a **SGDRegressor** (Stochastic Gradient Descent linear regression) with `max_iter=2000`, both with and without aggregated features
 - Trained a **RandomForestRegressor** as a baseline with `n_estimators=200`
 - Tuned the Random Forest using **RandomizedSearchCV** with 5-fold cross validation, searching over `n_estimators`, `max_depth`, and `min_samples_split` across 24 random combinations
-- Tested the Random Forest on aggregated features to compare against the baseline
+- Conducted residual analysis to identify where each model underperforms
+- Added city distance features based on residual error map findings and retrained both models
 
 ---
 
 ## Results
 
-| Metric | LR (baseline) | LR (aggregated) | RF (baseline) | RF (tuned) | RF (aggregated) |
-|--------|--------------|-----------------|---------------|------------|-----------------|
-| R2 Score | 0.61 | 0.64 | 0.790 | 0.791 | 0.786 |
+| Metric | LR (baseline) | LR (+ ratios) | LR (+ city dist) | RF (baseline) | RF (tuned) | RF (+ city dist, tuned) |
+|--------|--------------|---------------|------------------|---------------|------------|------------------------|
+| R2 Score | 0.615 | 0.640 | 0.648 | 0.790 | 0.791 | 0.804 |
 
-Linear Regression improves from 61% to 64% when aggregated features are added, as the derived ratios help capture some non-linear relationships that a linear model cannot learn on its own. Switching to Random Forest pushes R2 significantly to 79.1%. The tuned model matches the baseline, suggesting the default configuration is already well suited to this dataset.
+Linear Regression improves from 61.5% to 64% when ratio-based aggregated features are added. Adding city distance features improves it further, as proximity to major urban centres is a meaningful signal that latitude and longitude alone do not fully capture for a linear model.
 
-Notably, adding the aggregated features did not improve the Random Forest model. This is expected since Random Forest can already discover these relationships implicitly through sequential splits on the underlying features, making the derived ratios redundant.
+Random Forest reaches 79.1% as a baseline, with the tuned model matching this score. However, adding city distance features does improve the RF model, unlike the ratio features which were already implicitly discovered through splits. Distance to Los Angeles in particular shows a feature importance of 0.04, indicating it carries genuine new information.
 
-Looking at feature importance, median income is by far the strongest predictor, accounting for 43.6% of the model's decisions. Location features (latitude and longitude) are the next most influential, which makes intuitive sense for housing prices. It is worth noting that binary features like `ocean_proximity` may be slightly underrepresented in importance scores since they have fewer possible split thresholds than continuous features.
+Residual analysis revealed that both models struggle most with properties in dense urban areas around San Francisco and Los Angeles, where prices are more volatile and harder to predict from the available features alone.
+
+Looking at feature importance, median income remains the strongest predictor by a significant margin, accounting for 43.6% of the model's decisions. Location features (latitude, longitude, and city distances) are the next most influential, which makes intuitive sense given how strongly neighbourhood affects property value.
 
 ### Visualisations
 
@@ -91,7 +99,7 @@ Looking at feature importance, median income is by far the strongest predictor, 
 
 ![Data vs Price](images/data_vs_price.png)
 
-**Aggregated feature distributions (Log scaled)**
+**Aggregated feature distributions**
 
 ![Aggregated Feature Distributions](images/data_distribution_extra.png)
 
@@ -106,6 +114,18 @@ Looking at feature importance, median income is by far the strongest predictor, 
 **Feature Importance (Random Forest)**
 
 ![Feature Importance](images/feature_importance.png)
+
+**Residuals vs Fitted (LR and RF)**
+
+![Residuals vs Fitted](images/residuals_vs_fitted.png)
+
+**Residual Distributions (LR and RF)**
+
+![Residual Distribution](images/residual_distribution.png)
+
+**Geographic Error Map (LR and RF)**
+
+![Error Map](images/error_map.png)
 
 ---
 
@@ -145,9 +165,10 @@ jupyter
 
 - Always split your data before evaluating. Scoring on training data gives a misleadingly good result.
 - Fit the scaler on training data only. Fitting on the full dataset leaks test information into the model.
-- Data quality is very important. Removing the capped $500k values gave a noticeable improvement in R2.
+- Data quality has a real impact. Removing the capped $500k values gave a noticeable improvement in R2.
 - Linear regression has limits. When the underlying relationships are non-linear, the model will hit a ceiling no matter how well you tune it.
-- Feature engineering helps linear models but not always tree-based ones. Random Forest can already discover ratio-based relationships through sequential splits, so adding derived features made no difference to its R2.
+- Feature engineering helps linear models but not always tree-based ones. Ratio features made no difference to Random Forest, but domain-informed features like city distances did, because they carry genuinely new geographic information.
+- Residual analysis is more than a diagnostic tool. Plotting errors on a geographic map directly revealed where the model was struggling and motivated the city distance features.
 - Feature importance gives meaning to the model's score. Knowing that median income drives 43.6% of predictions is far more useful than a number alone.
 - RandomizedSearchCV is a practical alternative to GridSearchCV when the parameter space is large. It finds a good configuration without trying every single combination.
 
@@ -155,8 +176,7 @@ jupyter
 
 ## Future Improvements
 
-- Try XGBoost to see if it can push R2 beyond the current 79.1%
-- Add a correlation heatmap to understand which raw features relate most strongly to price
-- Add a predicted vs actual scatter plot to visualise model accuracy more intuitively
+- Try XGBoost to see if it can push R2 beyond the current best score
+- Add more city distance features or cluster-based location encoding
 - Try permutation importance alongside split-based importance to get a less biased view of feature contributions
-
+- Add a predicted vs actual scatter plot for a cleaner visualisation of model accuracy
