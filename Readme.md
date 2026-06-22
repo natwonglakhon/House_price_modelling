@@ -1,4 +1,4 @@
-# California Housing Price Prediction
+# Housing Price Prediction Model
 
 A machine learning project that predicts California median house prices using three models — Linear Regression (SGDRegressor), Random Forest, and XGBoost — with scikit-learn.
 
