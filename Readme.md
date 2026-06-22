@@ -37,7 +37,7 @@ california-housing/
 
 ## Dataset
 
-- **Source:** [Kaggle - California Housing Prices](https://www.kaggle.com/datasets/nalisha/california-housing-prices-dataset-clean-and-ml/data)
+- **Source:** [California Housing Prices](https://www.kaggle.com/datasets/nalisha/california-housing-prices-dataset-clean-and-ml/data)
 - **Shape:** 20,640 rows × 10 features (before filtering)
 - **Target:** `median_house_value`
 - **Features:** `longitude`, `latitude`, `housing_median_age`, `total_rooms`, `total_bedrooms`, `population`, `households`, `median_income`, `ocean_proximity`
@@ -83,13 +83,13 @@ california-housing/
 | Linear Regression (SGD) | Baseline | 0.604 |
 | Linear Regression (SGD) | + Aggregated | 0.604 |
 | Random Forest (tuned) | Baseline | 0.784 |
-| Random Forest (tuned) | + Aggregated | 0.784 |
+| Random Forest (tuned) | + Aggregated | 0.791 |
 | XGBoost | + Aggregated | 0.802 |
-| XGBoost | + Aggregated + distances | 0.820 |
+| XGBoost | + Aggregated | 0.820 |
 
 Linear Regression achieves 60.4% with both baseline and aggregated features, confirming that the feature set ceiling for a linear model on this dataset is around 60%, regardless of ratio-based transformations. The relationship between features and house price is fundamentally non-linear.
 
-Random Forest (tuned) reaches 78.4%, a significant improvement over linear regression, reflecting its ability to capture non-linear splits. XGBoost pushes this further to 80.2% on the same feature set, and to 82.0% after adding geographic distance features (city distances and nearest coastline). The distance features carry genuinely new geographic information that latitude and longitude alone do not fully capture, particularly for properties near major urban centres.
+Random Forest (tuned) reaches 79.1%, a significant improvement over linear regression, reflecting its ability to capture non-linear splits. XGBoost pushes this further to 80.2% on the same feature set, and to 82.0% after adding geographic distance features (city distances and nearest coastline). The distance features carry genuinely new geographic information that latitude and longitude alone do not fully capture, particularly for properties near major urban centres.
 
 Residual analysis revealed a meaningful trade-off: adding aggregated features improved $R^2$ (reduced the standard deviation of errors) while slightly increasing mean errors across all models. XGBoost retains the best residual profile, with the smallest mean error (−$527) and smallest standard deviation ($41,244) of the three models after feature engineering.
 
@@ -100,22 +100,6 @@ Feature importance analysis shows median income as the strongest predictor by a 
 **Target distribution (after filtering)**
 
 ![Price Distribution](images/median_house_value_distribution_filtered.png)
-
-**Feature vs Price**
-
-![Data vs Price](images/data_vs_price.png)
-
-**Aggregated feature distributions**
-
-![Aggregated Feature Distributions](images/data_distribution_extra.png)
-
-**Test data vs Linear Regression Prediction**
-
-![Test vs Prediction](images/Test_vs_model.png)
-
-**Test data vs Random Forest Prediction**
-
-![Test vs RF Prediction](images/Test_vs_model_rf.png)
 
 **Feature Importance (Random Forest)**
 
