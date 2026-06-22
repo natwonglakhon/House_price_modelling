@@ -84,7 +84,7 @@ california-housing/
 | Linear Regression (SGD) | + Aggregated | 0.604 |
 | Random Forest (tuned) | Baseline | 0.784 |
 | Random Forest (tuned) | + Aggregated | 0.791 |
-| XGBoost | + Aggregated | 0.802 |
+| XGBoost | Baseline | 0.802 |
 | XGBoost | + Aggregated | 0.820 |
 
 Linear Regression achieves 60.4% with both baseline and aggregated features, confirming that the feature set ceiling for a linear model on this dataset is around 60%, regardless of ratio-based transformations. The relationship between features and house price is fundamentally non-linear.
