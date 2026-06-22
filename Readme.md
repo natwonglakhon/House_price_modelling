@@ -127,7 +127,7 @@ Feature importance analysis shows median income as the strongest predictor by a 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/natwonglakhon/California_Housing_Model.git
+git clone https://github.com/natwonglakhon/House_price_modelling.git
 cd California_Housing_Model
 ```
 
