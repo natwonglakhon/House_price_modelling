@@ -8,6 +8,9 @@ A machine learning project that predicts California median house prices using th
 
 This project covers a full ML pipeline, starting from raw data exploration and cleaning, through to model training, evaluation, and visualisation, using the California Housing dataset. Residual analysis is used not just as a diagnostic tool but as an active driver of feature engineering, with geographic error maps motivating the addition of distance features that improved model performance.
 
+## Reading-friendly Report
+[Click here to read the report](https://natwonglakhon.github.io/main/California-Housing/)
+
 ---
 
 ## Repository Structure
